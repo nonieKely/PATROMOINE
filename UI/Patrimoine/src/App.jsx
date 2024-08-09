@@ -3,90 +3,111 @@ import { useState } from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
 import './App.css';
 import Possession from '../../../patrimoine-economique/models/possessions/Possession';
+import Flux from '../../../patrimoine-economique/models/possessions/Flux';
 
 function App() {
-  const [data, setData] = useState();
-  const [possessions, setPossessions] = useState([]);
-  const [datePicker, setDatePicker] = useState();
-  const [patrimonyValue, setPatrimonyValue] = useState(0);
-  const [arrayResult, setArrayResult] = useState([]);
+  const [data, setData] = useState()
+  const [possessions, setPossessions] = useState([])
+  const [datePicker, setDatePicker] = useState()
+  const [patrimonyValue, setPatrimonyValue] = useState(0)
+  const [arrayResult, setArrayResult] = useState([])
+
+   //const possession1 = new Possession("NOnie", "jsp", 123, new Date(2024, 0, 23), new Date(2025, 7, 12), 13);
+ //const possession2 = new Possession("Annah", "jgfy", 6254, new Date(2024, 1, 23), new Date(2025, 7, 16), 14);
+ //const possession3 = new Possession("NOnie", "sdflk", 1254, new Date(2024, 0, 23), new Date(2025, 7, 12), 13);
+ //const possession4 = new Possession("Annah", "dfdg", 62340, new Date(2024, 1, 23), new Date(2025, 7, 16), 14);
+
+ //const possessions = [possession1, possession2,possession3,possession4];
 
   useEffect(() => {
     fetch("./data.json")
       .then((response) => response.json())
       .then((data) => {
-        setData(data);
+        setData(data)
         if (data && data[1] && Array.isArray(data[1].data.possessions)) {
-          instancing(data[1].data.possessions);
+          instancing(data[1].data.possessions)
         }
       })
       .catch((error) => {
-        console.log(error);
-      });
-  }, []);
+        console.log(error)
+      })
+  }, [])
 
   function instancing(possessionsData) {
     const newPossessions = possessionsData.map((oneData) => {
+      if(oneData.libelle == "Alternance" ||oneData.libelle == "Survie"){
+        return new Flux(oneData.possesseur.nom, oneData.libelle,oneData.valeur, new Date(oneData.dateDebut),oneData.dateFin,
+          oneData.tauxAmortissement || "0",oneData.jour,oneData.valeurConstante
+      )
+      }
       return new Possession(
-        oneData.possesseur.nom,oneData.libelle,oneData.valeur,new Date(oneData.dateDebut),oneData.dateFin ,oneData.tauxAmortissement || 0,
-        oneData.jour,oneData.valeurConstante || 0
-      );
-    });
-    setPossessions(newPossessions);
+        oneData.possesseur.nom,oneData.libelle,oneData.valeur,new Date(oneData.dateDebut),oneData.dateFin ,oneData.tauxAmortissement || 0
+      )
+    })
+    setPossessions(newPossessions)
   }
 
   function getDatePicker(e) {
-    setDatePicker(e.target.value);
-    console.log(e.target.value);
+    setDatePicker(e.target.value)
+    console.log(e.target.value)
   }
 
   function getNewValue() {
-    const date = new Date(datePicker);
+    const date = new Date(datePicker)
 
     const values = possessions.map((possession) => 
       possession.getValeurApresAmortissement(date)
-    );
+    )
 
     const results = values.reduce((previousValue, currentValue) => 
       previousValue + currentValue
-    );
+    )
 
-    console.log(results);
-    setPatrimonyValue(results);
-    console.log("succeed");
+    console.log(results)
+    setPatrimonyValue(results)
+    console.log("succeed")
   }
 
   useEffect(() => {
     if (possessions.length > 0) {
-      getActualValue();
+      getActualValue()
     }
-  }, [possessions]);
+  }, [possessions])
 
   function getActualValue() {
-    const today = new Date();
-    const results = possessions.map(possession => 
-      possession.getValeurApresAmortissement(today)
-    );
-    setArrayResult(results);
+    const today = new Date()
+    
+    const results = possessions.map(possession => {
+      if(possession.libelle === "Alternance" || possession.libelle === "Survie"){
+        console.log(possession.valeurConstante)
+        const month = today.getMonth()- possession.dateDebut.getMonth()
+        return (possession.valeur + possession.valeurConstante*month)
+      }else{
+        return possession.getValeurApresAmortissement(today)
+      }
+      
+    }
+    )
+    setArrayResult(results)
   }
 
   function ShowList(props) {
-    const { possessions, arrayResult } = props;
+    const { possessions, arrayResult } = props
 
     return (
       <tbody>
-        {possessions.map((possession, index) => (
-        <tr key={index}>
+        {possessions.map((possession, i) => (
+        <tr key={i}>
             <td>{possession.libelle}</td>
             <td>{possession.valeur}</td>
             <td>{possession.dateDebut.toDateString()}</td>
             <td>{possession.dateFin ? possession.dateFin.toDateString() : 'inconnue'}</td>
             <td>{possession.tauxAmortissement}</td>
-            <td>{arrayResult[index]}</td>
+            <td>{arrayResult[i]}</td>
         </tr>
         ))}
       </tbody>
-    );
+    )
   }
 
 
@@ -130,7 +151,7 @@ function App() {
         <ShowList possessions={possessions} arrayResult={arrayResult} />
       </table>
     </>
-  );
+  )
 }
 
 export default App;
