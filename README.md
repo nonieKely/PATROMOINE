@@ -12,6 +12,9 @@ maintenant c'est que vous n'avez pas accès à ce submodule(moi non-plus LOL, je
 
 donc j'ai ré-uploadé patrimoine-économique , là vous pourrez voir quels sont les modifications que j'a apporté à votre code, Mr Sitraka.
 
+Voici le lien du patrimoine-éconimique cloné : 
+https://github.com/nonieKely/clone-Patrimoine.git
+
 Bref
 
 Enjoy!
